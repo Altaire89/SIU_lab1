@@ -2,6 +2,8 @@ function isMobileDevice() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
+/* Inicializamos el mapa con los marcadores y las coordenadas. Además de la ruta y las variables necesarias para
+el funcionamiento en dispositivos móviles.*/
 let coordinates = [182, 342];
 let marker;
 let destiny;
@@ -15,6 +17,7 @@ document.getElementById('confirmButton').addEventListener('click', confirmLocati
 document.getElementById('cancelButton').addEventListener('click', cancelLocation);
 
 function createMap() {
+    //Crea el mapa y el marcador de posición si se dispone de geolocalización.
     mymap = L.map('sample_map').setView(coordinates, 15);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -25,7 +28,7 @@ function createMap() {
     marker = L.marker(coordinates).addTo(mymap);
 
 
-    
+    //Si estamos en un dispositivo móvil. Necesitamos los eventos touchstart, touchmove y touchend.
     if (isMobileDevice()) {
         document.getElementById('sample_map').addEventListener('touchstart', function() {
             isTouchMoving = false;
@@ -70,28 +73,32 @@ if ('geolocation' in navigator) {
 }
 
 function centerLocation() {
+    //El botón centrar centra el zoom de la posición actual a X.
     mymap.setView(coordinates, 15);
 }
 
 function addMarker(coords) {
+    //Crea o actualiza el marcador de la posición de destino.
     if (destiny) {
-        destiny.setLatLng(coords); // Actualizar posición del marcador
+        destiny.setLatLng(coords);
     } else {
-        destiny = L.marker(coords).addTo(mymap); // Crear nuevo marcador si no existe
+        destiny = L.marker(coords).addTo(mymap);
     }
 }
 
 function confirmLocation(){
+    /*Si hay un destino marcado y no estamos en ruta. El botón de confirmación establece la ruta entre los dos puntos
+    y la añade al mapa. Dibujamos la linea de la ruta.*/
     if (destiny && marker && !isLocationSelected) {
         isLocationSelected = true;
         document.getElementById('confirmButton').style.backgroundColor = '#07f223';
-        document.getElementById('cancelButton').style.backgroundColor = ''; // Restaurar el color de fondo predeterminado
+        document.getElementById('cancelButton').style.backgroundColor = '';
         
-        // Obtener las coordenadas de los marcadores
+        // Conseguimos las coordenadas de los marcadores de posición actual y destino.
         const startPoint = marker.getLatLng();
         const endPoint = destiny.getLatLng();
         
-        // Crear una instancia de Leaflet Routing Machine
+        // Crear una instancia de la clase Routing de Leaflet.
         router = L.Routing.control({
             waypoints: [
                 L.latLng(startPoint.lat, startPoint.lng),
@@ -103,19 +110,36 @@ function confirmLocation(){
             }
         }).addTo(mymap);
         
-        // Ajustar el mapa para que los marcadores y la ruta sean visibles
+        // Ajustamos zoom del mapa para que se pueda visualizar bien toda la ruta.
         const bounds = L.latLngBounds([startPoint, endPoint]);
         mymap.fitBounds(bounds);
     }
 }
 
 function cancelLocation(){
+    //Restaura los botones y borramos la ruta establecida.
     isLocationSelected = false;
-    document.getElementById('confirmButton').style.backgroundColor = ''; // Restaurar el color de fondo predeterminado
-    document.getElementById('cancelButton').style.backgroundColor = ''; // Restaurar el color de fondo predeterminado
+    document.getElementById('confirmButton').style.backgroundColor = ''; 
+    document.getElementById('cancelButton').style.backgroundColor = '';
     
-    // Remover la capa de enrutamiento del mapa
+    // Quitamos la capa de la ruta del mapa.
     if (mymap && router) {
         mymap.removeControl(router);
+    }
+}
+
+setInterval(isNearDestiny, 1000);
+
+function isNearDestiny() {
+    const vibrateZone = 100; // Radio de la zona de vibración en metros.
+    
+    if (destiny && marker && isLocationSelected) {
+        const startPoint = marker.getLatLng();
+        const endPoint = destiny.getLatLng();
+        const distance = startPoint.distanceTo(endPoint);
+        
+        if (distance <= vibrateZone) {
+            navigator.vibrate(1000); // Vibrar durante X milisegundos.
+        }
     }
 }
