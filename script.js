@@ -5,9 +5,10 @@ function isMobileDevice() {
 let coordinates = [182, 342];
 let marker;
 let destiny;
-let mymap; // Declaramos mymap fuera de la función createMap
+let mymap;
 let isLocationSelected = false;
 let isTouchMoving = false;
+let router;
 
 document.getElementById('centerButton').addEventListener('click', centerLocation);
 document.getElementById('confirmButton').addEventListener('click', confirmLocation);
@@ -72,26 +73,49 @@ function centerLocation() {
     mymap.setView(coordinates, 15);
 }
 
-function confirmLocation(){
-    isLocationSelected = true;
-    const confirmButton = document.getElementById('confirmButton');
-    confirmButton.style.backgroundColor = '#07f223';
-    const cancelButton = document.getElementById('cancelButton');
-    cancelButton.style.backgroundColor = '#ff0000';
-}
-
-function cancelLocation(){
-    isLocationSelected = false;
-    const confirmButton = document.getElementById('confirmButton');
-    confirmButton.style.backgroundColor = '#aeb8c1';
-    const cancelButton = document.getElementById('cancelButton');
-    cancelButton.style.backgroundColor = '#aeb8c1';
-}
-
 function addMarker(coords) {
     if (destiny) {
         destiny.setLatLng(coords); // Actualizar posición del marcador
     } else {
         destiny = L.marker(coords).addTo(mymap); // Crear nuevo marcador si no existe
+    }
+}
+
+function confirmLocation(){
+    if (destiny && marker && !isLocationSelected) {
+        isLocationSelected = true;
+        document.getElementById('confirmButton').style.backgroundColor = '#07f223';
+        document.getElementById('cancelButton').style.backgroundColor = ''; // Restaurar el color de fondo predeterminado
+        
+        // Obtener las coordenadas de los marcadores
+        const startPoint = marker.getLatLng();
+        const endPoint = destiny.getLatLng();
+        
+        // Crear una instancia de Leaflet Routing Machine
+        router = L.Routing.control({
+            waypoints: [
+                L.latLng(startPoint.lat, startPoint.lng),
+                L.latLng(endPoint.lat, endPoint.lng)
+            ],
+            routeWhileDragging: true,
+            lineOptions: {
+                styles: [{color: 'blue', opacity: 0.6, weight: 6}]
+            }
+        }).addTo(mymap);
+        
+        // Ajustar el mapa para que los marcadores y la ruta sean visibles
+        const bounds = L.latLngBounds([startPoint, endPoint]);
+        mymap.fitBounds(bounds);
+    }
+}
+
+function cancelLocation(){
+    isLocationSelected = false;
+    document.getElementById('confirmButton').style.backgroundColor = ''; // Restaurar el color de fondo predeterminado
+    document.getElementById('cancelButton').style.backgroundColor = ''; // Restaurar el color de fondo predeterminado
+    
+    // Remover la capa de enrutamiento del mapa
+    if (mymap && router) {
+        mymap.removeControl(router);
     }
 }
