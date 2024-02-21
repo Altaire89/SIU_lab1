@@ -10,7 +10,7 @@ let destiny;
 let mymap;
 let isLocationSelected = false;
 let isTouchMoving = false;
-let router;
+let route;
 
 document.getElementById('centerButton').addEventListener('click', centerLocation);
 document.getElementById('confirmButton').addEventListener('click', confirmLocation);
@@ -95,14 +95,14 @@ function confirmLocation(){
         document.getElementById('cancelButton').style.backgroundColor = '';
         
         // Conseguimos las coordenadas de los marcadores de posición actual y destino.
-        const startPoint = marker.getLatLng();
-        const endPoint = destiny.getLatLng();
+        const markerCoords = marker.getLatLng();
+        const destinyCoords = destiny.getLatLng();
         
         // Crear una instancia de la clase Routing de Leaflet.
-        router = L.Routing.control({
+        route = L.Routing.control({
             waypoints: [
-                L.latLng(startPoint.lat, startPoint.lng),
-                L.latLng(endPoint.lat, endPoint.lng)
+                L.latLng(markerCoords.lat, markerCoords.lng),
+                L.latLng(destinyCoords.lat, destinyCoords.lng)
             ],
             routeWhileDragging: true,
             lineOptions: {
@@ -111,7 +111,7 @@ function confirmLocation(){
         }).addTo(mymap);
         
         // Ajustamos zoom del mapa para que se pueda visualizar bien toda la ruta.
-        const bounds = L.latLngBounds([startPoint, endPoint]);
+        const bounds = L.latLngBounds([markerCoords, destinyCoords]);
         mymap.fitBounds(bounds);
     }
 }
@@ -123,7 +123,7 @@ function cancelLocation(){
     document.getElementById('cancelButton').style.backgroundColor = '';
     
     // Quitamos la capa de la ruta del mapa.
-    if (mymap && router) {
+    if (mymap && route) {
         mymap.removeControl(router);
     }
 }
@@ -134,9 +134,9 @@ function isNearDestiny() {
     const vibrateZone = 100; // Radio de la zona de vibración en metros.
     
     if (destiny && marker && isLocationSelected) {
-        const startPoint = marker.getLatLng();
-        const endPoint = destiny.getLatLng();
-        const distance = startPoint.distanceTo(endPoint);
+        const markerCoords = marker.getLatLng();
+        const destinyCoords = destiny.getLatLng();
+        const distance = markerCoords.distanceTo(destinyCoords);
         
         if (distance <= vibrateZone) {
             navigator.vibrate(1000); // Vibrar durante X milisegundos.
