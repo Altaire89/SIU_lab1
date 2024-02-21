@@ -1,9 +1,43 @@
 body {
-    padding: 0;
-    margin: 0;
+  padding: 0;
+  margin: 0;
+}
+
+html, body, #sample_map {
+  height: 100%;
+}
+
+#centerButton {
+position: absolute;
+bottom: 10px;
+left: 10px;
+padding: 10px;
+background-color: #0084ff;
+border: 1px solid #170569;
+cursor: pointer;
+z-index: 1000;
+}
+
+#cancelButton {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 10px;
+  background-color: #aeb8c1;
+  border: 1px solid #000000;
+  cursor: pointer;
+  z-index: 1000;
   }
+
   
-  html, body, #sample_map {
-    height: 100%;
+#confirmButton {
+  position: absolute;
+  bottom: 10px;
+  padding: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #aeb8c1;
+  border: 1px solid #000000;
+  cursor: pointer;
+  z-index: 1000;
   }
-  
