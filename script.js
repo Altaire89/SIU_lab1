@@ -90,6 +90,12 @@ function confirmLocation(){
     /*Si hay un destino marcado y no estamos en ruta. El botón de confirmación establece la ruta entre los dos puntos
     y la añade al mapa. Dibujamos la linea de la ruta.*/
     if (destiny && marker && !isLocationSelected) {
+        // Eliminamos la ruta existente si la hay.
+        if (route) {
+            mymap.removeControl(route);
+            route = null;
+        }
+
         isLocationSelected = true;
         document.getElementById('confirmButton').style.backgroundColor = '#07f223';
         document.getElementById('cancelButton').style.backgroundColor = '';
@@ -98,7 +104,7 @@ function confirmLocation(){
         const markerCoords = marker.getLatLng();
         const destinyCoords = destiny.getLatLng();
         
-        // Crear una instancia de la clase Routing de Leaflet.
+        // Crear una nueva instancia de la clase Routing de Leaflet.
         route = L.Routing.control({
             waypoints: [
                 L.latLng(markerCoords.lat, markerCoords.lng),
@@ -123,15 +129,16 @@ function cancelLocation(){
     document.getElementById('cancelButton').style.backgroundColor = '';
     
     // Quitamos la capa de la ruta del mapa.
-    if (mymap && route) {
-        mymap.removeControl(router);
+    if (route) {
+        mymap.removeControl(route);
+        route = null; // Establecemos la variable route a null para indicar que la ruta ha sido eliminada.
     }
 }
 
 setInterval(isNearDestiny, 1000);
 
 function isNearDestiny() {
-    const vibrateZone = 100; // Radio de la zona de vibración en metros.
+    const vibrateZone = 500; // Radio de la zona de vibración en metros.
     
     if (destiny && marker && isLocationSelected) {
         const markerCoords = marker.getLatLng();
@@ -139,7 +146,7 @@ function isNearDestiny() {
         const distance = markerCoords.distanceTo(destinyCoords);
         
         if (distance <= vibrateZone) {
-            navigator.vibrate(1000); // Vibrar durante X milisegundos.
+            navigator.vibrate(15000); // Vibrar durante 15 segundos.
         }
     }
 }
